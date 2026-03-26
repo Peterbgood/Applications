@@ -17,26 +17,33 @@
         .stat-label { display: block; font-size: 0.65rem; text-transform: uppercase; color: var(--slate); font-weight: bold; margin-bottom: 4px; }
         .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--emerald); }
 
+        /* Filter Section & Mobile Fix */
         .filter-section { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #475569; }
         .filter-grid { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-        .filter-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 8px; }
+        .filter-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 5px; }
         .filter-group label { font-size: 0.75rem; font-weight: bold; color: var(--slate); text-transform: uppercase; }
         
         input[type="date"], select, input[type="text"], input[type="url"] { 
             background: var(--bg); border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; font-size: 0.95rem; width: 100%; box-sizing: border-box; 
         }
 
+        /* "Today" Button Styling */
+        .date-input-container { display: flex; gap: 5px; }
+        .btn-today { background: #334155; color: white; border: 1px solid #475569; padding: 0 10px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+        .btn-today:hover { background: var(--blue); }
+
         .results-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #334155; font-size: 0.85rem; color: var(--slate); }
         .count-badge { background: var(--emerald); color: var(--bg); padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 
+        /* Table UI */
         .table-box { background: white; border-radius: 12px; color: #1e293b; width: 100%; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 
         .company-name { font-weight: bold; font-size: 1.05rem; display: block; color: #0f172a; }
         .job-title { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; display: block; }
-        
         .meta-data { font-size: 0.7rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        
         .days-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: var(--slate); }
         .days-old { background: #fee2e2; color: var(--red); }
         .resume-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: white; }
@@ -63,6 +70,7 @@
             tr { display: flex; flex-direction: column; border-bottom: 3px solid #f1f5f9; }
             td { width: 100% !important; padding: 10px 14px; }
             .action-cell-container { justify-content: flex-start; }
+            .filter-group { min-width: 100%; } /* Stacks filters on small screens */
         }
     </style>
 </head>
@@ -84,8 +92,15 @@
     <div class="filter-section">
         <div class="filter-grid">
             <div class="filter-group">
+                <label>Search Company/Title</label>
+                <input type="text" id="searchTerm" placeholder="Type to search..." onkeyup="runFilters()">
+            </div>
+            <div class="filter-group">
                 <label>Date Filter</label>
-                <input type="date" id="filterDate" onchange="runFilters()">
+                <div class="date-input-container">
+                    <input type="date" id="filterDate" onchange="runFilters()">
+                    <button class="btn-today" onclick="setFilterToday()">TODAY</button>
+                </div>
             </div>
             <div class="filter-group">
                 <label>Work Type</label>
@@ -110,7 +125,10 @@
 <div id="modalOverlay" class="modal-overlay">
     <form id="jobForm" class="form-box">
         <h2 id="modalTitle" style="margin:0; color:var(--emerald)">Add Job</h2>
-        <input type="date" id="appliedDate">
+        <div class="date-input-container">
+            <input type="date" id="appliedDate">
+            <button type="button" class="btn-today" onclick="setFormToday()">SET TODAY</button>
+        </div>
         <input type="text" id="company" placeholder="Company Name" required>
         <input type="text" id="title" placeholder="Job Title" required>
         <select id="location">
@@ -140,7 +158,6 @@
                     <button type="button" onclick="resetDeleteUI()" style="flex:1; background:var(--slate); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">NO</button>
                 </div>
             </div>
-
             <button type="button" onclick="closeModal()" style="background:none; border:none; color:var(--slate); text-decoration:underline; cursor:pointer;">Cancel</button>
         </div>
     </form>
@@ -159,7 +176,6 @@
     }
 
     window.initDashboard = function(data) {
-        // Reverse here so newest entries are at the top
         jobData = data.slice().reverse(); 
         updateGlobalStats(jobData);
         runFilters();
@@ -172,19 +188,24 @@
         document.getElementById('stat-local').innerText = data.filter(i => (i.location || "") === 'Local').length;
     }
 
+    // Combined Search + Date + Type Filters
     function runFilters() {
         const dateVal = document.getElementById('filterDate').value;
         const typeVal = document.getElementById('filterType').value;
+        const searchVal = document.getElementById('searchTerm').value.toLowerCase();
+
         let filtered = jobData.filter(i => {
-            let mDate = true; let mType = true;
+            let mDate = true; let mType = true; let mSearch = true;
+            
             if (dateVal) { 
                 const d = new Date(i.date);
-                // Compare using local YYYY-MM-DD
-                const localStr = d.toLocaleDateString('en-CA'); // en-CA format is YYYY-MM-DD
-                mDate = localStr === dateVal; 
+                mDate = d.toLocaleDateString('en-CA') === dateVal; 
             }
             if (typeVal !== 'all') { mType = (i.location || "") === typeVal; }
-            return mDate && mType;
+            if (searchVal) {
+                mSearch = i.company.toLowerCase().includes(searchVal) || i.title.toLowerCase().includes(searchVal);
+            }
+            return mDate && mType && mSearch;
         });
         document.getElementById('visibleCount').innerText = filtered.length;
         renderRows(filtered);
@@ -199,11 +220,9 @@
         data.forEach((item) => {
             const tr = document.createElement('tr');
             const sClass = `status-${(item.status || 'applied').toLowerCase()}`;
-            
             const applyDate = new Date(item.date);
             applyDate.setHours(0,0,0,0);
-            const diffTime = today - applyDate;
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffDays = Math.floor((today - applyDate) / (1000 * 60 * 60 * 24));
             
             let resClass = 'tag-frontend';
             if(item.resume === 'Marketing') resClass = 'tag-marketing';
@@ -238,14 +257,19 @@
         });
     }
 
+    // Desktop/Mobile "Today" shortcuts
+    function setFilterToday() {
+        document.getElementById('filterDate').value = new Date().toLocaleDateString('en-CA');
+        runFilters();
+    }
+    function setFormToday() {
+        document.getElementById('appliedDate').value = new Date().toLocaleDateString('en-CA');
+    }
+
     function openModalForAdd() {
         document.getElementById('jobForm').reset();
         resetDeleteUI();
-        
-        // FIX: Reliable Local YYYY-MM-DD for input
-        const localDate = new Date().toLocaleDateString('en-CA');
-        document.getElementById('appliedDate').value = localDate;
-
+        setFormToday();
         document.getElementById('modalTitle').innerText = "Add Job";
         document.getElementById('company').readOnly = false;
         document.getElementById('deleteBtn').style.display = 'none';
@@ -256,8 +280,7 @@
         resetDeleteUI();
         const item = jobData.find(i => i.company === companyName);
         if (item.date) {
-            const d = new Date(item.date);
-            document.getElementById('appliedDate').value = d.toLocaleDateString('en-CA');
+            document.getElementById('appliedDate').value = new Date(item.date).toLocaleDateString('en-CA');
         }
         document.getElementById('company').value = item.company;
         document.getElementById('company').readOnly = true;
@@ -288,7 +311,12 @@
         location.reload();
     }
 
-    function clearFilters() { document.getElementById('filterDate').value = ''; document.getElementById('filterType').value = 'all'; runFilters(); }
+    function clearFilters() { 
+        document.getElementById('filterDate').value = ''; 
+        document.getElementById('filterType').value = 'all'; 
+        document.getElementById('searchTerm').value = '';
+        runFilters(); 
+    }
     function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
     function showStatus(v) { document.getElementById('sync-status').style.display = v ? 'block' : 'none'; }
 
