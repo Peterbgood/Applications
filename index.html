@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Job Quest | Dashboard</title>
     <style>
-        :root { --emerald: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --blue: #3b82f6; --red: #ef4444; --slate: #94a3b8; }
+        :root { --emerald: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --blue: #3b82f6; --red: #ef4444; --slate: #94a3b8; --amber: #f59e0b; --purple: #a855f7; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
         .container { max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         
@@ -17,7 +17,6 @@
         .stat-label { display: block; font-size: 0.65rem; text-transform: uppercase; color: var(--slate); font-weight: bold; margin-bottom: 4px; }
         .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--emerald); }
 
-        /* Filter Section */
         .filter-section { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #475569; }
         .filter-grid { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
         .filter-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 8px; }
@@ -30,37 +29,40 @@
         .results-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #334155; font-size: 0.85rem; color: var(--slate); }
         .count-badge { background: var(--emerald); color: var(--bg); padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 
-        /* Table & Row Styling */
         .table-box { background: white; border-radius: 12px; color: #1e293b; width: 100%; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 
         .company-name { font-weight: bold; font-size: 1.05rem; display: block; color: #0f172a; }
         .job-title { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; display: block; }
-        .meta-data { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+        
+        .meta-data { font-size: 0.7rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .days-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: var(--slate); }
+        .days-old { background: #fee2e2; color: var(--red); }
+        .resume-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: white; }
+        .tag-frontend { background: var(--blue); }
+        .tag-marketing { background: var(--emerald); }
+        .tag-ba { background: var(--purple); }
 
-        /* Status Colors */
-        .status-select { border-radius: 6px; padding: 6px; font-weight: bold; font-size: 0.75rem; border: none; width: 120px; }
+        .status-select { border-radius: 6px; padding: 6px; font-weight: bold; font-size: 0.75rem; border: none; width: 130px; }
         .status-applied { background: #fef9c3; color: #854d0e; }
         .status-interviewing { background: #dcfce7; color: #166534; }
         .status-rejected { background: #fee2e2; color: #991b1b; }
 
-        /* Fixed Action Buttons Alignment */
         .action-cell-container { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-        .btn-link { background: var(--blue); color: white; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; height: 38px; width: 38px; box-sizing: border-box; }
+        .btn-link { background: var(--blue); color: white; text-decoration: none; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 38px; width: 38px; box-sizing: border-box; }
         .btn-edit { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #475569; height: 38px; font-size: 0.8rem; }
 
         .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--emerald); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: none; cursor: pointer; z-index: 100; }
 
-        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .form-box { background: var(--card); padding: 1.5rem; border-radius: 16px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #475569; }
-        
+        .delete-btn { background: var(--red); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; opacity: 0.9; }
+
         @media (max-width: 600px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
             tr { display: flex; flex-direction: column; border-bottom: 3px solid #f1f5f9; }
-            td { width: 100% !important; box-sizing: border-box; padding: 10px 14px; }
-            .action-cell-container { justify-content: flex-start; margin-top: 5px; }
+            td { width: 100% !important; padding: 10px 14px; }
+            .action-cell-container { justify-content: flex-start; }
         }
     </style>
 </head>
@@ -115,15 +117,30 @@
             <option value="Local">Local (TN Area)</option>
             <option value="Remote">Remote</option>
         </select>
-        <input type="text" id="resume" placeholder="Resume Version Used">
+        <select id="resume">
+            <option value="Frontend">Frontend Resume</option>
+            <option value="Marketing">Marketing Resume</option>
+            <option value="Business Analyst">Business Analyst Resume</option>
+        </select>
         <input type="url" id="jobUrl" placeholder="Job Posting Link">
         <select id="status">
             <option value="Applied">Applied</option>
             <option value="Interviewing">Interviewing</option>
             <option value="Rejected">Rejected</option>
         </select>
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-            <button type="submit" id="addBtn" style="background:var(--emerald); padding:15px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:var(--bg)">SAVE ENTRY</button>
+
+        <div id="buttonArea" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+            <button type="submit" id="saveBtn" style="background:var(--emerald); padding:15px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:var(--bg)">SAVE ENTRY</button>
+            <button type="button" id="deleteBtn" class="delete-btn" style="display:none;" onclick="toggleDeleteConfirm()">DELETE ENTRY</button>
+            
+            <div id="confirmDeleteArea" style="display:none; flex-direction:column; gap:8px;">
+                <p style="color:var(--red); font-size:0.8rem; text-align:center; margin:5px 0; font-weight:bold;">ARE YOU SURE?</p>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" onclick="executeDelete()" style="flex:1; background:var(--red); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">YES</button>
+                    <button type="button" onclick="resetDeleteUI()" style="flex:1; background:var(--slate); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">NO</button>
+                </div>
+            </div>
+
             <button type="button" onclick="closeModal()" style="background:none; border:none; color:var(--slate); text-decoration:underline; cursor:pointer;">Cancel</button>
         </div>
     </form>
@@ -142,8 +159,9 @@
     }
 
     window.initDashboard = function(data) {
-        jobData = data;
-        updateGlobalStats(data);
+        // Reverse here so newest entries are at the top
+        jobData = data.slice().reverse(); 
+        updateGlobalStats(jobData);
         runFilters();
     };
 
@@ -157,22 +175,17 @@
     function runFilters() {
         const dateVal = document.getElementById('filterDate').value;
         const typeVal = document.getElementById('filterType').value;
-
         let filtered = jobData.filter(i => {
-            let matchDate = true;
-            let matchType = true;
-
-            if (dateVal) {
-                const rowDate = new Date(i.date).toISOString().split('T')[0];
-                matchDate = rowDate === dateVal;
+            let mDate = true; let mType = true;
+            if (dateVal) { 
+                const d = new Date(i.date);
+                // Compare using local YYYY-MM-DD
+                const localStr = d.toLocaleDateString('en-CA'); // en-CA format is YYYY-MM-DD
+                mDate = localStr === dateVal; 
             }
-
-            if (typeVal !== 'all') {
-                matchType = (i.location || "") === typeVal;
-            }
-            return matchDate && matchType;
+            if (typeVal !== 'all') { mType = (i.location || "") === typeVal; }
+            return mDate && mType;
         });
-
         document.getElementById('visibleCount').innerText = filtered.length;
         renderRows(filtered);
     }
@@ -180,15 +193,32 @@
     function renderRows(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
         data.forEach((item) => {
             const tr = document.createElement('tr');
             const sClass = `status-${(item.status || 'applied').toLowerCase()}`;
-            const d = item.date ? new Date(item.date).toLocaleDateString() : '---';
+            
+            const applyDate = new Date(item.date);
+            applyDate.setHours(0,0,0,0);
+            const diffTime = today - applyDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            let resClass = 'tag-frontend';
+            if(item.resume === 'Marketing') resClass = 'tag-marketing';
+            if(item.resume === 'Business Analyst') resClass = 'tag-ba';
+
             tr.innerHTML = `
                 <td>
                     <span class="company-name">${item.company}</span>
                     <span class="job-title">${item.title}</span>
-                    <span class="meta-data">📅 ${d} | 📍 ${item.location || 'Local'}</span>
+                    <span class="meta-data">
+                        📅 ${applyDate.toLocaleDateString()} 
+                        <span class="days-badge ${diffDays > 7 ? 'days-old' : ''}">${diffDays}d ago</span>
+                        | <span class="resume-tag ${resClass}">${item.resume || 'Frontend'}</span>
+                        | 📍 ${item.location || 'Local'}
+                    </span>
                 </td>
                 <td style="width:140px">
                     <select class="status-select ${sClass}" onchange="quickUpdate('${item.company}', this.value)">
@@ -208,44 +238,67 @@
         });
     }
 
-    function clearFilters() {
-        document.getElementById('filterDate').value = '';
-        document.getElementById('filterType').value = 'all';
-        runFilters();
-    }
-
     function openModalForAdd() {
         document.getElementById('jobForm').reset();
-        document.getElementById('appliedDate').valueAsDate = new Date();
+        resetDeleteUI();
+        
+        // FIX: Reliable Local YYYY-MM-DD for input
+        const localDate = new Date().toLocaleDateString('en-CA');
+        document.getElementById('appliedDate').value = localDate;
+
         document.getElementById('modalTitle').innerText = "Add Job";
         document.getElementById('company').readOnly = false;
+        document.getElementById('deleteBtn').style.display = 'none';
         document.getElementById('modalOverlay').style.display = 'flex';
     }
 
     window.setEdit = function(companyName) {
+        resetDeleteUI();
         const item = jobData.find(i => i.company === companyName);
-        if (item.date) document.getElementById('appliedDate').value = new Date(item.date).toISOString().split('T')[0];
+        if (item.date) {
+            const d = new Date(item.date);
+            document.getElementById('appliedDate').value = d.toLocaleDateString('en-CA');
+        }
         document.getElementById('company').value = item.company;
         document.getElementById('company').readOnly = true;
         document.getElementById('title').value = item.title;
         document.getElementById('location').value = item.location || "Local";
-        document.getElementById('resume').value = item.resume || "";
+        document.getElementById('resume').value = item.resume || "Frontend";
         document.getElementById('status').value = item.status;
         document.getElementById('jobUrl').value = item.url || "";
+        document.getElementById('modalTitle').innerText = "Edit Entry";
+        document.getElementById('deleteBtn').style.display = 'block';
         document.getElementById('modalOverlay').style.display = 'flex';
     };
+
+    function toggleDeleteConfirm() {
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('saveBtn').style.display = 'none';
+        document.getElementById('confirmDeleteArea').style.display = 'flex';
+    }
+    function resetDeleteUI() {
+        document.getElementById('deleteBtn').style.display = 'block';
+        document.getElementById('saveBtn').style.display = 'block';
+        document.getElementById('confirmDeleteArea').style.display = 'none';
+    }
+    async function executeDelete() {
+        showStatus(true); closeModal();
+        const payload = { action: 'delete', company: document.getElementById('company').value };
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        location.reload();
+    }
+
+    function clearFilters() { document.getElementById('filterDate').value = ''; document.getElementById('filterType').value = 'all'; runFilters(); }
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+    function showStatus(v) { document.getElementById('sync-status').style.display = v ? 'block' : 'none'; }
 
     async function quickUpdate(company, status) {
         showStatus(true);
         const item = jobData.find(i => i.company === company);
         const payload = { ...item, status, appliedDate: item.date };
         await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        loadJobs();
-        showStatus(false);
+        loadJobs(); showStatus(false);
     }
-
-    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
-    function showStatus(v) { document.getElementById('sync-status').style.display = v ? 'block' : 'none'; }
 
     document.getElementById('jobForm').onsubmit = async (e) => {
         e.preventDefault();
