@@ -3,348 +3,693 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Job Quest | Dashboard</title>
+    <title>Job Quest</title>
     <style>
-        :root { --emerald: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --blue: #3b82f6; --red: #ef4444; --slate: #94a3b8; --amber: #f59e0b; --purple: #a855f7; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
-        .container { max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        
-        header { border-bottom: 2px solid var(--card); padding-bottom: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        h1 { color: var(--emerald); margin: 0; font-size: 1.8rem; font-weight: 900; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #475569; }
-        .stat-label { display: block; font-size: 0.65rem; text-transform: uppercase; color: var(--slate); font-weight: bold; margin-bottom: 4px; }
-        .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--emerald); }
-
-        /* Filter Section & Mobile Fix */
-        .filter-section { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #475569; }
-        .filter-grid { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-        .filter-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 5px; }
-        .filter-group label { font-size: 0.75rem; font-weight: bold; color: var(--slate); text-transform: uppercase; }
-        
-        input[type="date"], select, input[type="text"], input[type="url"] { 
-            background: var(--bg); border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; font-size: 0.95rem; width: 100%; box-sizing: border-box; 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f6f8;
+            color: #1a1a1a;
+            font-size: 15px;
         }
 
-        /* "Today" Button Styling */
-        .date-input-container { display: flex; gap: 5px; }
-        .btn-today { background: #334155; color: white; border: 1px solid #475569; padding: 0 10px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
-        .btn-today:hover { background: var(--blue); }
+        header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-        .results-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #334155; font-size: 0.85rem; color: var(--slate); }
-        .count-badge { background: var(--emerald); color: var(--bg); padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+        header h1 { font-size: 1.1rem; font-weight: 700; }
 
-        /* Table UI */
-        .table-box { background: white; border-radius: 12px; color: #1e293b; width: 100%; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
 
-        .company-name { font-weight: bold; font-size: 1.05rem; display: block; color: #0f172a; }
-        .job-title { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; display: block; }
-        .meta-data { font-size: 0.7rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        
-        .days-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: var(--slate); }
-        .days-old { background: #fee2e2; color: var(--red); }
-        .resume-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: white; }
-        .tag-frontend { background: var(--blue); }
-        .tag-marketing { background: var(--emerald); }
-        .tag-ba { background: var(--purple); }
+        #sync-status { display: none; font-size: 0.75rem; color: #2563eb; font-weight: 600; }
 
-        .status-select { border-radius: 6px; padding: 6px; font-weight: bold; font-size: 0.75rem; border: none; width: 130px; }
-        .status-applied { background: #fef9c3; color: #854d0e; }
-        .status-interviewing { background: #dcfce7; color: #166534; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .btn-new {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
 
-        .action-cell-container { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-        .btn-link { background: var(--blue); color: white; text-decoration: none; padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; height: 38px; width: 38px; box-sizing: border-box; }
-        .btn-edit { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #475569; height: 38px; font-size: 0.8rem; }
+        .btn-new:hover { background: #1d4ed8; }
 
-        .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--emerald); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: none; cursor: pointer; z-index: 100; }
+        .container { max-width: 900px; margin: 0 auto; padding: 24px 20px 80px; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .form-box { background: var(--card); padding: 1.5rem; border-radius: 16px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #475569; }
-        .delete-btn { background: var(--red); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; opacity: 0.9; }
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-num { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+        .stat-label { font-size: 0.72rem; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+        /* Toolbar */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .count-label { font-size: 0.85rem; color: #666; }
+        .count-label strong { color: #1a1a1a; }
+
+        .btn-filters {
+            background: white;
+            border: 1px solid #d0d0d0;
+            color: #444;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-filters:hover { border-color: #999; }
+        .btn-filters.active { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+        /* Filter panel */
+        .filter-panel {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-panel.open { display: flex; }
+
+        .filter-fields { display: flex; flex-wrap: wrap; gap: 12px; }
+
+        .filter-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.72rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        input[type="text"], input[type="date"], input[type="url"], select {
+            background: white;
+            border: 1px solid #d0d0d0;
+            color: #1a1a1a;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            width: 100%;
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus { outline: none; border-color: #2563eb; }
+
+        .date-row { display: flex; gap: 6px; }
+
+        .btn-today {
+            background: #f0f0f0;
+            border: 1px solid #d0d0d0;
+            color: #444;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .btn-today:hover { background: #e0e0e0; }
+
+        .filter-footer {
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 10px;
+        }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: inherit;
+            padding: 0;
+        }
+
+        .btn-reset:hover { color: #1d4ed8; }
+
+        /* Job list */
+        .job-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .job-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .job-card:hover { border-color: #bbb; }
+
+        .job-info { flex: 1; min-width: 0; }
+
+        .job-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+        .company { font-weight: 700; font-size: 1rem; color: #111; }
+        .job-title-text { font-size: 0.85rem; color: #555; }
+
+        .job-bottom { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+        .chip {
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .chip-date  { background: #f0f0f0; color: #666; }
+        .chip-days  { background: #f0f0f0; color: #666; }
+        .chip-days.stale { background: #fee2e2; color: #b91c1c; }
+        .chip-remote { background: #dbeafe; color: #1d4ed8; }
+        .chip-local  { background: #d1fae5; color: #065f46; }
+        .chip-applied      { background: #fef9c3; color: #854d0e; }
+        .chip-interviewing { background: #d1fae5; color: #065f46; }
+        .chip-rejected     { background: #fee2e2; color: #b91c1c; }
+
+        .job-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+        .btn-link {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            width: 34px; height: 34px;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .btn-link:hover { background: #dbeafe; }
+
+        .btn-edit {
+            background: #f5f5f5;
+            border: 1px solid #d0d0d0;
+            color: #444;
+            padding: 0 14px;
+            height: 34px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-edit:hover { background: #e8e8e8; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 1rem; font-weight: 700; }
+
+        .btn-close {
+            background: none; border: none;
+            font-size: 1.1rem; color: #999; cursor: pointer;
+            padding: 2px 6px; border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .btn-close:hover { background: #f0f0f0; color: #333; }
+
+        .modal-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.75rem; font-weight: 600; color: #555; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-save {
+            background: #2563eb; color: white; border: none;
+            padding: 11px; border-radius: 6px;
+            font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+
+        .btn-save:hover { background: #1d4ed8; }
+
+        .btn-delete {
+            background: #fff5f5; color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 9px; border-radius: 6px;
+            font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; display: none; font-family: inherit;
+        }
+
+        .btn-delete:hover { background: #fee2e2; }
+
+        .confirm-area {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .confirm-area p {
+            font-size: 0.8rem;
+            color: #b91c1c;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .confirm-btns { display: flex; gap: 8px; }
+        .confirm-btns button {
+            flex: 1; padding: 10px; border-radius: 6px;
+            font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; font-family: inherit; border: none;
+        }
+
+        .btn-yes { background: #b91c1c; color: white; }
+        .btn-yes:hover { background: #991b1b; }
+        .btn-no { background: #f0f0f0; color: #444; }
+        .btn-no:hover { background: #e0e0e0; }
+
+        .btn-cancel {
+            background: none; border: none;
+            color: #999; font-size: 0.8rem;
+            cursor: pointer; padding: 6px; font-family: inherit;
+        }
+
+        .btn-cancel:hover { color: #555; }
 
         @media (max-width: 600px) {
-            tr { display: flex; flex-direction: column; border-bottom: 3px solid #f1f5f9; }
-            td { width: 100% !important; padding: 10px 14px; }
-            .action-cell-container { justify-content: flex-start; }
-            .filter-group { min-width: 100%; } /* Stacks filters on small screens */
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .job-card { flex-wrap: wrap; }
+            .job-actions { width: 100%; }
+            .form-row { grid-template-columns: 1fr; }
+            .container { padding: 16px 14px 60px; }
+            .filter-group { min-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>JOB QUEST</h1>
-        <div id="sync-status" style="display:none; color: var(--emerald); font-weight: bold;">SYNCING...</div>
-    </header>
+<header>
+    <h1>Job Quest</h1>
+    <div class="header-right">
+        <span id="sync-status">Saving…</span>
+        <button class="btn-new" onclick="Dashboard.openModal()">+ Add Job</button>
+    </div>
+</header>
 
-    <div class="stats-grid">
-        <div class="stat-card"><span class="stat-label">Total</span><span id="stat-total" class="stat-value">0</span></div>
-        <div class="stat-card"><span class="stat-label">Remote</span><span id="stat-remote" class="stat-value" style="color:var(--blue)">0</span></div>
-        <div class="stat-card"><span class="stat-label">Local</span><span id="stat-local" class="stat-value" style="color:var(--emerald)">0</span></div>
-        <div class="stat-card"><span class="stat-label">Interviews</span><span id="stat-active" class="stat-value">0</span></div>
+<div class="container">
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="stat-remote">0</div>
+            <div class="stat-label">Remote</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="stat-local">0</div>
+            <div class="stat-label">Local</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="stat-active">0</div>
+            <div class="stat-label">Interviews</div>
+        </div>
     </div>
 
-    <div class="filter-section">
-        <div class="filter-grid">
+    <div class="toolbar">
+        <div class="count-label">Showing <strong id="visibleCount">0</strong> applications</div>
+        <button class="btn-filters" id="filterToggle" onclick="Dashboard.toggleFilters()">Filters</button>
+    </div>
+
+    <div class="filter-panel" id="filterPanel">
+        <div class="filter-fields">
             <div class="filter-group">
-                <label>Search Company/Title</label>
-                <input type="text" id="searchTerm" placeholder="Type to search..." onkeyup="runFilters()">
+                <label>Search</label>
+                <input type="text" id="searchTerm" placeholder="Company or title…" oninput="Dashboard.render()">
             </div>
             <div class="filter-group">
-                <label>Date Filter</label>
-                <div class="date-input-container">
-                    <input type="date" id="filterDate" onchange="runFilters()">
-                    <button class="btn-today" onclick="setFilterToday()">TODAY</button>
+                <label>Date Applied</label>
+                <div class="date-row">
+                    <input type="date" id="filterDate" onchange="Dashboard.render()">
+                    <button class="btn-today" onclick="Dashboard.setToday()">Today</button>
                 </div>
             </div>
             <div class="filter-group">
                 <label>Work Type</label>
-                <select id="filterType" onchange="runFilters()">
-                    <option value="all">All Locations</option>
-                    <option value="Remote">Remote Only</option>
-                    <option value="Local">Local (TN Area)</option>
+                <select id="filterType" onchange="Dashboard.render()">
+                    <option value="all">All</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Local">Local</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="filterStatus" onchange="Dashboard.render()">
+                    <option value="all">All</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Rejected">Rejected</option>
                 </select>
             </div>
         </div>
-        <div class="results-meta">
-            <span>Showing <span class="count-badge" id="visibleCount">0</span> entries</span>
-            <button onclick="clearFilters()" style="background:none; border:none; color:var(--blue); cursor:pointer; font-size:0.75rem; text-decoration:underline;">Reset Filters</button>
+        <div class="filter-footer">
+            <button class="btn-reset" onclick="Dashboard.clearFilters()">Reset Filters</button>
         </div>
     </div>
 
-    <div class="table-box">
-        <table><tbody id="tableBody"></tbody></table>
-    </div>
+    <div class="job-list" id="jobList"></div>
 </div>
 
+<!-- Modal -->
 <div id="modalOverlay" class="modal-overlay">
-    <form id="jobForm" class="form-box">
-        <h2 id="modalTitle" style="margin:0; color:var(--emerald)">Add Job</h2>
-        <div class="date-input-container">
-            <input type="date" id="appliedDate">
-            <button type="button" class="btn-today" onclick="setFormToday()">SET TODAY</button>
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Application</h2>
+            <button class="btn-close" onclick="Dashboard.closeModal()">✕</button>
         </div>
-        <input type="text" id="company" placeholder="Company Name" required>
-        <input type="text" id="title" placeholder="Job Title" required>
-        <select id="location">
-            <option value="Local">Local (TN Area)</option>
-            <option value="Remote">Remote</option>
-        </select>
-        <select id="resume">
-            <option value="Frontend">Frontend Resume</option>
-            <option value="Marketing">Marketing Resume</option>
-            <option value="Business Analyst">Business Analyst Resume</option>
-        </select>
-        <input type="url" id="jobUrl" placeholder="Job Posting Link">
-        <select id="status">
-            <option value="Applied">Applied</option>
-            <option value="Interviewing">Interviewing</option>
-            <option value="Rejected">Rejected</option>
-        </select>
-
-        <div id="buttonArea" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-            <button type="submit" id="saveBtn" style="background:var(--emerald); padding:15px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:var(--bg)">SAVE ENTRY</button>
-            <button type="button" id="deleteBtn" class="delete-btn" style="display:none;" onclick="toggleDeleteConfirm()">DELETE ENTRY</button>
-            
-            <div id="confirmDeleteArea" style="display:none; flex-direction:column; gap:8px;">
-                <p style="color:var(--red); font-size:0.8rem; text-align:center; margin:5px 0; font-weight:bold;">ARE YOU SURE?</p>
-                <div style="display:flex; gap:10px;">
-                    <button type="button" onclick="executeDelete()" style="flex:1; background:var(--red); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">YES</button>
-                    <button type="button" onclick="resetDeleteUI()" style="flex:1; background:var(--slate); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">NO</button>
+        <form id="jobForm">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date Applied</label>
+                        <div class="date-row">
+                            <input type="date" id="formDate">
+                            <button type="button" class="btn-today" onclick="Dashboard.setFormToday()">Today</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Work Type</label>
+                        <select id="formLocation">
+                            <option value="Local">Local</option>
+                            <option value="Remote">Remote</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" id="formCompany" placeholder="e.g. Acme Corp" required>
+                </div>
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" id="formTitle" placeholder="e.g. Frontend Developer" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Resume Used</label>
+                        <select id="formResume">
+                            <option value="Frontend">Frontend</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Business Analyst">Business Analyst</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="formStatus">
+                            <option value="Applied">Applied</option>
+                            <option value="Interviewing">Interviewing</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Job Posting URL</label>
+                    <input type="url" id="formUrl" placeholder="https://…">
                 </div>
             </div>
-            <button type="button" onclick="closeModal()" style="background:none; border:none; color:var(--slate); text-decoration:underline; cursor:pointer;">Cancel</button>
-        </div>
-    </form>
+            <div class="modal-footer">
+                <button type="submit" class="btn-save" id="btnSave">Save</button>
+                <button type="button" id="deleteBtn" class="btn-delete" onclick="Dashboard.showDeleteConfirm()">Delete this entry</button>
+                <div class="confirm-area" id="confirmArea">
+                    <p>Are you sure you want to delete this?</p>
+                    <div class="confirm-btns">
+                        <button type="button" class="btn-yes" onclick="Dashboard.executeDelete()">Yes, delete</button>
+                        <button type="button" class="btn-no" onclick="Dashboard.hideDeleteConfirm()">Cancel</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-cancel" onclick="Dashboard.closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<button class="fab" onclick="openModalForAdd()">+</button>
-
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyApDqMKCN17ubbkpHLqolVMlmN3gmnSFyTGCQP1uJcUK0vG_FGBwDMcS3ceEVpNs4O/exec'; 
-    let jobData = [];
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyApDqMKCN17ubbkpHLqolVMlmN3gmnSFyTGCQP1uJcUK0vG_FGBwDMcS3ceEVpNs4O/exec';
 
-    function loadJobs() {
-        const script = document.createElement('script');
-        script.src = `${API_URL}?callback=initDashboard&t=${Date.now()}`;
-        document.body.appendChild(script);
-    }
+    const Dashboard = {
+        data: [],
 
-    window.initDashboard = function(data) {
-        jobData = data.slice().reverse(); 
-        updateGlobalStats(jobData);
-        runFilters();
-    };
+        init() {
+            const script = document.createElement('script');
+            script.src = `${API_URL}?callback=Dashboard.load&t=${Date.now()}`;
+            document.body.appendChild(script);
+        },
 
-    function updateGlobalStats(data) {
-        document.getElementById('stat-total').innerText = data.length;
-        document.getElementById('stat-active').innerText = data.filter(i => i.status === 'Interviewing').length;
-        document.getElementById('stat-remote').innerText = data.filter(i => (i.location || "") === 'Remote').length;
-        document.getElementById('stat-local').innerText = data.filter(i => (i.location || "") === 'Local').length;
-    }
+        load(raw) {
+            this.data = raw.reverse();
+            this.updateStats();
+            this.render();
+        },
 
-    // Combined Search + Date + Type Filters
-    function runFilters() {
-        const dateVal = document.getElementById('filterDate').value;
-        const typeVal = document.getElementById('filterType').value;
-        const searchVal = document.getElementById('searchTerm').value.toLowerCase();
+        parseDate(val) {
+            if (!val) return new Date();
+            const clean = val.toString().substring(0, 10).replace(/-/g, '/');
+            return new Date(clean);
+        },
 
-        let filtered = jobData.filter(i => {
-            let mDate = true; let mType = true; let mSearch = true;
-            
-            if (dateVal) { 
-                const d = new Date(i.date);
-                mDate = d.toLocaleDateString('en-CA') === dateVal; 
-            }
-            if (typeVal !== 'all') { mType = (i.location || "") === typeVal; }
-            if (searchVal) {
-                mSearch = i.company.toLowerCase().includes(searchVal) || i.title.toLowerCase().includes(searchVal);
-            }
-            return mDate && mType && mSearch;
-        });
-        document.getElementById('visibleCount').innerText = filtered.length;
-        renderRows(filtered);
-    }
+        toggleFilters() {
+            const panel = document.getElementById('filterPanel');
+            const btn = document.getElementById('filterToggle');
+            const open = panel.classList.toggle('open');
+            btn.classList.toggle('active', open);
+            btn.textContent = open ? 'Hide Filters' : 'Filters';
+        },
 
-    function renderRows(data) {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        const today = new Date();
-        today.setHours(0,0,0,0);
+        setToday() {
+            document.getElementById('filterDate').value = new Date().toLocaleDateString('en-CA');
+            this.render();
+        },
 
-        data.forEach((item) => {
-            const tr = document.createElement('tr');
-            const sClass = `status-${(item.status || 'applied').toLowerCase()}`;
-            const applyDate = new Date(item.date);
-            applyDate.setHours(0,0,0,0);
-            const diffDays = Math.floor((today - applyDate) / (1000 * 60 * 60 * 24));
-            
-            let resClass = 'tag-frontend';
-            if(item.resume === 'Marketing') resClass = 'tag-marketing';
-            if(item.resume === 'Business Analyst') resClass = 'tag-ba';
+        setFormToday() {
+            document.getElementById('formDate').value = new Date().toLocaleDateString('en-CA');
+        },
 
-            tr.innerHTML = `
-                <td>
-                    <span class="company-name">${item.company}</span>
-                    <span class="job-title">${item.title}</span>
-                    <span class="meta-data">
-                        📅 ${applyDate.toLocaleDateString()} 
-                        <span class="days-badge ${diffDays > 7 ? 'days-old' : ''}">${diffDays}d ago</span>
-                        | <span class="resume-tag ${resClass}">${item.resume || 'Frontend'}</span>
-                        | 📍 ${item.location || 'Local'}
-                    </span>
-                </td>
-                <td style="width:140px">
-                    <select class="status-select ${sClass}" onchange="quickUpdate('${item.company}', this.value)">
-                        <option value="Applied" ${item.status==='Applied'?'selected':''}>Applied</option>
-                        <option value="Interviewing" ${item.status==='Interviewing'?'selected':''}>Interviewing</option>
-                        <option value="Rejected" ${item.status==='Rejected'?'selected':''}>Rejected</option>
-                    </select>
-                </td>
-                <td style="width:110px;">
-                    <div class="action-cell-container">
-                        ${item.url ? `<a href="${item.url}" target="_blank" class="btn-link">🔗</a>` : ''}
-                        <button class="btn-edit" onclick="setEdit('${item.company}')">EDIT</button>
+        clearFilters() {
+            document.getElementById('searchTerm').value = '';
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterStatus').value = 'all';
+            this.render();
+        },
+
+        render() {
+            const search = document.getElementById('searchTerm').value.toLowerCase();
+            const filterDate = document.getElementById('filterDate').value;
+            const filterType = document.getElementById('filterType').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const list = document.getElementById('jobList');
+
+            list.innerHTML = '';
+            let count = 0;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            this.data.forEach(item => {
+                const dateObj = this.parseDate(item.date || item.appliedDate);
+                const dateStr = dateObj.toLocaleDateString('en-CA');
+
+                if (search && !item.company?.toLowerCase().includes(search) && !item.title?.toLowerCase().includes(search)) return;
+                if (filterDate && dateStr !== filterDate) return;
+                if (filterType !== 'all' && item.location !== filterType) return;
+                if (filterStatus !== 'all' && item.status !== filterStatus) return;
+
+                count++;
+                const diff = Math.floor((today - dateObj) / 86400000);
+                const status = item.status || 'Applied';
+                const loc = item.location || 'Local';
+                const url = item.url || '';
+                const dateDisplay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                const card = document.createElement('div');
+                card.className = 'job-card';
+                card.innerHTML = `
+                    <div class="job-info">
+                        <div class="job-top">
+                            <span class="company">${item.company || '—'}</span>
+                            <span class="job-title-text">${item.title || '—'}</span>
+                        </div>
+                        <div class="job-bottom">
+                            <span class="chip chip-date">${dateDisplay}</span>
+                            <span class="chip chip-days ${diff > 7 ? 'stale' : ''}">${diff}d ago</span>
+                            <span class="chip ${loc === 'Remote' ? 'chip-remote' : 'chip-local'}">${loc}</span>
+                            <span class="chip chip-${status.toLowerCase()}">${status}</span>
+                        </div>
                     </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+                    <div class="job-actions">
+                        ${url ? `<a href="${url}" target="_blank" class="btn-link" title="View posting">↗</a>` : ''}
+                        <button class="btn-edit" onclick="Dashboard.openModal('${item.company.replace(/'/g, "\\'")}')">Edit</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
 
-    // Desktop/Mobile "Today" shortcuts
-    function setFilterToday() {
-        document.getElementById('filterDate').value = new Date().toLocaleDateString('en-CA');
-        runFilters();
-    }
-    function setFormToday() {
-        document.getElementById('appliedDate').value = new Date().toLocaleDateString('en-CA');
-    }
+            document.getElementById('visibleCount').textContent = count;
+            if (count === 0) {
+                list.innerHTML = `<div class="empty-state">No applications found.</div>`;
+            }
+        },
 
-    function openModalForAdd() {
-        document.getElementById('jobForm').reset();
-        resetDeleteUI();
-        setFormToday();
-        document.getElementById('modalTitle').innerText = "Add Job";
-        document.getElementById('company').readOnly = false;
-        document.getElementById('deleteBtn').style.display = 'none';
-        document.getElementById('modalOverlay').style.display = 'flex';
-    }
+        updateStats() {
+            document.getElementById('stat-total').textContent = this.data.length;
+            document.getElementById('stat-active').textContent = this.data.filter(i => i.status === 'Interviewing').length;
+            document.getElementById('stat-remote').textContent = this.data.filter(i => i.location === 'Remote').length;
+            document.getElementById('stat-local').textContent = this.data.filter(i => i.location === 'Local').length;
+        },
 
-    window.setEdit = function(companyName) {
-        resetDeleteUI();
-        const item = jobData.find(i => i.company === companyName);
-        if (item.date) {
-            document.getElementById('appliedDate').value = new Date(item.date).toLocaleDateString('en-CA');
+        openModal(company = null) {
+            document.getElementById('jobForm').reset();
+            this.hideDeleteConfirm();
+            const deleteBtn = document.getElementById('deleteBtn');
+            const companyField = document.getElementById('formCompany');
+            deleteBtn.style.display = company ? 'block' : 'none';
+            companyField.readOnly = !!company;
+            companyField.style.opacity = company ? '0.6' : '1';
+            document.getElementById('modalTitle').textContent = company ? 'Edit Application' : 'Add Application';
+
+            if (company) {
+                const item = this.data.find(i => i.company === company);
+                if (item) {
+                    document.getElementById('formDate').value = this.parseDate(item.date || item.appliedDate).toLocaleDateString('en-CA');
+                    document.getElementById('formCompany').value = item.company;
+                    document.getElementById('formTitle').value = item.title;
+                    document.getElementById('formLocation').value = item.location || 'Local';
+                    document.getElementById('formResume').value = item.resume || 'Frontend';
+                    document.getElementById('formUrl').value = item.url || '';
+                    document.getElementById('formStatus').value = item.status || 'Applied';
+                }
+            } else {
+                document.getElementById('formDate').value = new Date().toLocaleDateString('en-CA');
+            }
+
+            document.getElementById('modalOverlay').style.display = 'flex';
+        },
+
+        closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        },
+
+        showDeleteConfirm() {
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('btnSave').style.display = 'none';
+            document.getElementById('confirmArea').style.display = 'flex';
+        },
+
+        hideDeleteConfirm() {
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('btnSave').style.display = 'block';
+            document.getElementById('confirmArea').style.display = 'none';
+        },
+
+        async executeDelete() {
+            document.getElementById('sync-status').style.display = 'inline';
+            this.closeModal();
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', company: document.getElementById('formCompany').value }) });
+            location.reload();
+        },
+
+        async sync(payload) {
+            document.getElementById('sync-status').style.display = 'inline';
+            this.closeModal();
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            setTimeout(() => location.reload(), 1000);
         }
-        document.getElementById('company').value = item.company;
-        document.getElementById('company').readOnly = true;
-        document.getElementById('title').value = item.title;
-        document.getElementById('location').value = item.location || "Local";
-        document.getElementById('resume').value = item.resume || "Frontend";
-        document.getElementById('status').value = item.status;
-        document.getElementById('jobUrl').value = item.url || "";
-        document.getElementById('modalTitle').innerText = "Edit Entry";
-        document.getElementById('deleteBtn').style.display = 'block';
-        document.getElementById('modalOverlay').style.display = 'flex';
     };
 
-    function toggleDeleteConfirm() {
-        document.getElementById('deleteBtn').style.display = 'none';
-        document.getElementById('saveBtn').style.display = 'none';
-        document.getElementById('confirmDeleteArea').style.display = 'flex';
-    }
-    function resetDeleteUI() {
-        document.getElementById('deleteBtn').style.display = 'block';
-        document.getElementById('saveBtn').style.display = 'block';
-        document.getElementById('confirmDeleteArea').style.display = 'none';
-    }
-    async function executeDelete() {
-        showStatus(true); closeModal();
-        const payload = { action: 'delete', company: document.getElementById('company').value };
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        location.reload();
-    }
-
-    function clearFilters() { 
-        document.getElementById('filterDate').value = ''; 
-        document.getElementById('filterType').value = 'all'; 
-        document.getElementById('searchTerm').value = '';
-        runFilters(); 
-    }
-    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
-    function showStatus(v) { document.getElementById('sync-status').style.display = v ? 'block' : 'none'; }
-
-    async function quickUpdate(company, status) {
-        showStatus(true);
-        const item = jobData.find(i => i.company === company);
-        const payload = { ...item, status, appliedDate: item.date };
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        loadJobs(); showStatus(false);
-    }
-
-    document.getElementById('jobForm').onsubmit = async (e) => {
+    document.getElementById('jobForm').onsubmit = e => {
         e.preventDefault();
-        showStatus(true); closeModal();
-        const payload = {
-            appliedDate: document.getElementById('appliedDate').value,
-            company: document.getElementById('company').value,
-            title: document.getElementById('title').value,
-            location: document.getElementById('location').value,
-            resume: document.getElementById('resume').value,
-            status: document.getElementById('status').value,
-            url: document.getElementById('jobUrl').value
-        };
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        location.reload();
+        Dashboard.sync({
+            appliedDate: document.getElementById('formDate').value,
+            company: document.getElementById('formCompany').value,
+            title: document.getElementById('formTitle').value,
+            location: document.getElementById('formLocation').value,
+            resume: document.getElementById('formResume').value,
+            status: document.getElementById('formStatus').value,
+            url: document.getElementById('formUrl').value
+        });
     };
 
-    window.onload = loadJobs;
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('modalOverlay')) Dashboard.closeModal();
+    });
+
+    window.onload = () => Dashboard.init();
 </script>
 </body>
 </html>
