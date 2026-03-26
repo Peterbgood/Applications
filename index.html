@@ -427,7 +427,6 @@
     <div class="job-list" id="jobList"></div>
 </div>
 
-<!-- Modal -->
 <div id="modalOverlay" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
@@ -435,6 +434,8 @@
             <button class="btn-close" onclick="Dashboard.closeModal()">✕</button>
         </div>
         <form id="jobForm">
+            <input type="hidden" id="oldCompany">
+            
             <div class="modal-body">
                 <div class="form-row">
                     <div class="form-group">
@@ -508,7 +509,7 @@
         init() {
             const script = document.createElement('script');
             script.src = `${API_URL}?callback=Dashboard.load&t=${Date.now()}`;
-            document.body.appendChild(script);
+            script.body = document.body.appendChild(script);
         },
 
         load(raw) {
@@ -616,16 +617,23 @@
         openModal(company = null) {
             document.getElementById('jobForm').reset();
             this.hideDeleteConfirm();
+            
             const deleteBtn = document.getElementById('deleteBtn');
             const companyField = document.getElementById('formCompany');
+            const oldCompanyField = document.getElementById('oldCompany');
+            
             deleteBtn.style.display = company ? 'block' : 'none';
-            companyField.readOnly = !!company;
-            companyField.style.opacity = company ? '0.6' : '1';
+            
+            // MODIFIED: We no longer make this read-only!
+            companyField.readOnly = false;
+            companyField.style.opacity = '1';
+            
             document.getElementById('modalTitle').textContent = company ? 'Edit Application' : 'Add Application';
 
             if (company) {
                 const item = this.data.find(i => i.company === company);
                 if (item) {
+                    oldCompanyField.value = item.company; // Store original name
                     document.getElementById('formDate').value = this.parseDate(item.date || item.appliedDate).toLocaleDateString('en-CA');
                     document.getElementById('formCompany').value = item.company;
                     document.getElementById('formTitle').value = item.title;
@@ -635,6 +643,7 @@
                     document.getElementById('formStatus').value = item.status || 'Applied';
                 }
             } else {
+                oldCompanyField.value = ""; // Clear for new entries
                 document.getElementById('formDate').value = new Date().toLocaleDateString('en-CA');
             }
 
@@ -660,7 +669,9 @@
         async executeDelete() {
             document.getElementById('sync-status').style.display = 'inline';
             this.closeModal();
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', company: document.getElementById('formCompany').value }) });
+            // Use the "oldCompany" value to ensure we delete the right row even if name was typed over
+            const target = document.getElementById('oldCompany').value || document.getElementById('formCompany').value;
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', company: target }) });
             location.reload();
         },
 
@@ -675,6 +686,9 @@
     document.getElementById('jobForm').onsubmit = e => {
         e.preventDefault();
         Dashboard.sync({
+            // Send both the new name and the old name so Google Sheets can find and replace
+            action: 'upsert', 
+            oldCompany: document.getElementById('oldCompany').value,
             appliedDate: document.getElementById('formDate').value,
             company: document.getElementById('formCompany').value,
             title: document.getElementById('formTitle').value,
