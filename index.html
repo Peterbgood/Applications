@@ -4,106 +4,163 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Quest Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-900 text-white p-4 md:p-8">
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8">
-            <h1 class="text-4xl font-extrabold text-emerald-400 tracking-tight">Job Quest <span class="text-slate-500 text-2xl font-light">v1.0</span></h1>
-            <p class="text-slate-400 mt-2">Tracking applications for Front-End & Analyst roles.</p>
-        </header>
+    <style>
+        :root { --emerald: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; margin: 0; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        header { border-bottom: 2px solid var(--card); padding-bottom: 1rem; margin-bottom: 2rem; }
+        h1 { color: var(--emerald); margin: 0; font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; }
         
-        <form id="jobForm" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-            <input type="text" id="company" placeholder="Company" class="bg-slate-700 p-2 rounded border border-slate-600 outline-none focus:border-emerald-400" required>
-            <input type="text" id="title" placeholder="Job Title" class="bg-slate-700 p-2 rounded border border-slate-600 outline-none focus:border-emerald-400" required>
-            <input type="text" id="location" placeholder="Location (e.g. Knoxville/Remote)" class="bg-slate-700 p-2 rounded border border-slate-600 outline-none focus:border-emerald-400">
-            <select id="status" class="bg-slate-700 p-2 rounded border border-slate-600 text-slate-200">
-                <option>Applied</option>
-                <option>Interviewing</option>
-                <option>Offer</option>
-                <option>Rejected</option>
-                <option>Ghosted</option>
-            </select>
-            <input type="text" id="resume" placeholder="Resume Version" class="bg-slate-700 p-2 rounded border border-slate-600 outline-none focus:border-emerald-400">
-            <button type="submit" id="submitBtn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold py-2 px-4 rounded-lg transition-all transform active:scale-95">Add Quest</button>
-        </form>
+        /* Form */
+        .form-box { background: var(--card); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; border: 2px solid transparent; transition: 0.3s; }
+        .editing-mode { border-color: var(--emerald); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+        input, select { background: var(--bg); border: 1px solid #475569; color: white; padding: 10px; border-radius: 6px; outline: none; }
+        button { background: var(--emerald); color: var(--bg); border: none; font-weight: bold; border-radius: 6px; cursor: pointer; padding: 10px; }
+        
+        /* Table */
+        .table-box { background: white; border-radius: 12px; overflow: hidden; color: #1e293b; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; color: #64748b; border-bottom: 2px solid #e2e8f0; cursor: pointer; user-select: none; }
+        th:hover { background: #f1f5f9; color: var(--emerald); }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        
+        .btn-edit { font-size: 10px; background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 4px; cursor: pointer; border: none; }
+        .btn-edit:hover { background: var(--emerald); color: white; }
+    </style>
+</head>
+<body>
 
-        <div class="bg-white rounded-xl shadow-2xl p-4">
-            <div id="wrapper"></div>
-        </div>
+<div class="container">
+    <header><h1>JOB QUEST</h1></header>
+
+    <form id="jobForm" class="form-box">
+        <input type="hidden" id="editIndex"> <input type="text" id="company" placeholder="Company" required>
+        <input type="text" id="title" placeholder="Job Title" required>
+        <select id="status">
+            <option>Applied</option>
+            <option>Interviewing</option>
+            <option>Offer</option>
+            <option>Rejected</option>
+        </select>
+        <input type="text" id="resume" placeholder="Resume Used">
+        <input type="text" id="locations" placeholder="Location">
+        <button type="submit" id="submitBtn">Add Entry</button>
+        <button type="button" id="cancelBtn" style="display:none; background:#ef4444; color:white;">Cancel</button>
+    </form>
+
+    <div class="table-box">
+        <table>
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Date ↕</th>
+                    <th onclick="sortTable(1)">Company ↕</th>
+                    <th onclick="sortTable(2)">Job Title ↕</th>
+                    <th onclick="sortTable(3)">Status ↕</th>
+                    <th onclick="sortTable(4)">Location ↕</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="6" style="text-align:center; padding:2rem;">Loading applications...</td></tr>
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/grid.umd.js"></script>
-    <script>
-        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
-        const WEB_APP_URL = 'YOUR_DEPLOYED_URL_HERE';
+<script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyApDqMKCN17ubbkpHLqolVMlmN3gmnSFyTGCQP1uJcUK0vG_FGBwDMcS3ceEVpNs4O/exec';
+    let jobData = [];
 
-        // 1. Initialize Grid.js Table
-        const grid = new gridjs.Grid({
-            columns: [
-                "Date Applied", 
-                "Company", 
-                "Job Title", 
-                "Location", 
-                "Status", 
-                "Resume Used"
-            ],
-            server: {
-                url: WEB_APP_URL,
-                then: data => data.map(item => [
-                    item['Date Applied'] ? new Date(item['Date Applied']).toLocaleDateString() : 'N/A', 
-                    item.Company, 
-                    item['Job Title'],
-                    item.Location,
-                    item.Status, 
-                    item['Resume Used']
-                ])
-            },
-            sort: true,
-            search: true,
-            resizable: true,
-            style: {
-                table: { 'font-size': '14px' },
-                th: { 'background-color': '#f8fafc', 'color': '#1e293b' }
-            },
-            pagination: { limit: 10 }
-        }).render(document.getElementById("wrapper"));
+    // 1. LOAD DATA
+    function loadJobs() {
+        const script = document.createElement('script');
+        script.src = `${API_URL}?callback=handleData&t=${Date.now()}`;
+        document.body.appendChild(script);
+    }
 
-        // 2. Handle Form Submission
-        document.getElementById('jobForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerText = 'Syncing...';
-            
-            const payload = {
-                company: document.getElementById('company').value,
-                title: document.getElementById('title').value,
-                location: document.getElementById('location').value,
-                status: document.getElementById('status').value,
-                resume: document.getElementById('resume').value
-            };
+    window.handleData = function(data) {
+        jobData = data;
+        renderTable(jobData);
+    };
 
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                });
-                
-                // Clear form and refresh table
-                e.target.reset();
-                btn.innerText = 'Success!';
-                setTimeout(() => {
-                    location.reload(); 
-                }, 1000);
-            } catch (err) {
-                alert('Error connecting to Sheet');
-                btn.disabled = false;
-                btn.innerText = 'Add Quest';
-            }
+    // 2. RENDER TABLE
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        data.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color:#64748b">${item['Date Applied'] ? new Date(item['Date Applied']).toLocaleDateString() : '---'}</td>
+                <td style="font-weight:bold">${item['Company'] || ''}</td>
+                <td>${item['Job Title'] || ''}</td>
+                <td><span style="font-size:11px; font-weight:bold">${item['Status'] || ''}</span></td>
+                <td>${item['Locations'] || ''}</td>
+                <td><button class="btn-edit" onclick="editRow(${index})">EDIT</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 3. SORT LOGIC
+    let sortDir = 1;
+    function sortTable(colIdx) {
+        sortDir *= -1;
+        const keys = ['Date Applied', 'Company', 'Job Title', 'Status', 'Locations'];
+        const key = keys[colIdx];
+        
+        jobData.sort((a, b) => {
+            let valA = a[key] || '';
+            let valB = b[key] || '';
+            return valA.toString().localeCompare(valB.toString()) * sortDir;
+        });
+        renderTable(jobData);
+    }
+
+    // 4. EDIT LOGIC (Pre-fills the form)
+    window.editRow = function(index) {
+        const item = jobData[index];
+        document.getElementById('company').value = item['Company'];
+        document.getElementById('title').value = item['Job Title'];
+        document.getElementById('status').value = item['Status'];
+        document.getElementById('resume').value = item['Resume Used'];
+        document.getElementById('locations').value = item['Locations'];
+        
+        // Change UI to Edit Mode
+        document.getElementById('jobForm').classList.add('editing-mode');
+        document.getElementById('submitBtn').innerText = 'Update Entry';
+        document.getElementById('cancelBtn').style.display = 'block';
+        // Note: Real "Edit" requires a slightly more complex Google Script to target a specific row.
+        // For now, this lets you "re-submit" the corrected info.
+    }
+
+    document.getElementById('cancelBtn').onclick = () => location.reload();
+
+    // 5. SUBMIT (POST)
+    document.getElementById('jobForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = 'Syncing...';
+
+        const payload = {
+            company: document.getElementById('company').value,
+            title: document.getElementById('title').value,
+            status: document.getElementById('status').value,
+            resume: document.getElementById('resume').value,
+            locations: document.getElementById('locations').value
         };
-    </script>
+
+        try {
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            btn.innerText = 'Success!';
+            setTimeout(() => { location.reload(); }, 800);
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerText = 'Retry';
+        }
+    };
+
+    window.onload = loadJobs;
+</script>
 </body>
 </html>
