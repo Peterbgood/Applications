@@ -6,55 +6,62 @@
     <title>Job Quest | Dashboard</title>
     <style>
         :root { --emerald: #10b981; --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --blue: #3b82f6; --red: #ef4444; --slate: #94a3b8; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
         .container { max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         
         header { border-bottom: 2px solid var(--card); padding-bottom: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
         h1 { color: var(--emerald); margin: 0; font-size: 1.8rem; font-weight: 900; }
 
-        /* Dashboard Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .stat-card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #475569; }
         .stat-label { display: block; font-size: 0.65rem; text-transform: uppercase; color: var(--slate); font-weight: bold; margin-bottom: 4px; }
         .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--emerald); }
 
-        /* Modal Overlay */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .form-box { background: var(--card); padding: 1.5rem; border-radius: 16px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #475569; }
-        input, select { background: var(--bg); border: 1px solid #475569; color: white; padding: 12px; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        /* Filter Section */
+        .filter-section { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #475569; }
+        .filter-grid { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .filter-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-size: 0.75rem; font-weight: bold; color: var(--slate); text-transform: uppercase; }
         
-        .form-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-        #addBtn { background: var(--emerald); color: var(--bg); border: none; font-weight: bold; padding: 15px; border-radius: 8px; cursor: pointer; }
-        #delBtn { background: #334155; color: var(--slate); border: none; font-weight: bold; padding: 12px; border-radius: 8px; cursor: pointer; display: none; }
-        #delBtn.confirm-state { background: var(--red); color: white; }
-        .btn-cancel { background: transparent; color: var(--slate); border: none; padding: 10px; cursor: pointer; text-decoration: underline; }
-
-        /* Table */
-        .table-box { background: white; border-radius: 12px; color: #1e293b; width: 100%; overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; word-wrap: break-word; }
-
-        @media (max-width: 600px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            tr { display: flex; flex-wrap: wrap; padding: 12px; border-bottom: 2px solid #f1f5f9; }
-            td { display: block; padding: 4px 0 !important; border: none; width: 100% !important; }
-            .action-cell { display: flex; justify-content: space-between; margin-top: 8px; }
+        input[type="date"], select, input[type="text"], input[type="url"] { 
+            background: var(--bg); border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; font-size: 0.95rem; width: 100%; box-sizing: border-box; 
         }
 
-        .company-name { font-weight: bold; font-size: 1rem; display: block; color: #0f172a; }
-        .job-title { font-size: 0.75rem; color: #64748b; }
-        .loc-tag { font-size: 0.7rem; color: var(--blue); font-weight: bold; margin-right: 8px; }
-        .res-tag { font-size: 0.7rem; color: #94a3b8; font-style: italic; }
-        
-        .status-select { border-radius: 6px; padding: 6px; font-weight: bold; font-size: 0.75rem; border: none; width: 110px; }
+        .results-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #334155; font-size: 0.85rem; color: var(--slate); }
+        .count-badge { background: var(--emerald); color: var(--bg); padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+
+        /* Table & Row Styling */
+        .table-box { background: white; border-radius: 12px; color: #1e293b; width: 100%; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+        .company-name { font-weight: bold; font-size: 1.05rem; display: block; color: #0f172a; }
+        .job-title { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; display: block; }
+        .meta-data { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+
+        /* Status Colors */
+        .status-select { border-radius: 6px; padding: 6px; font-weight: bold; font-size: 0.75rem; border: none; width: 120px; }
         .status-applied { background: #fef9c3; color: #854d0e; }
         .status-interviewing { background: #dcfce7; color: #166534; }
-        .status-offer { background: #10b981; color: white; }
         .status-rejected { background: #fee2e2; color: #991b1b; }
 
-        .btn-link { background: var(--blue); color: white; text-decoration: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; }
-        .btn-edit { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--emerald); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: none; z-index: 100; cursor: pointer; }
+        /* Fixed Action Buttons Alignment */
+        .action-cell-container { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        .btn-link { background: var(--blue); color: white; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; height: 38px; width: 38px; box-sizing: border-box; }
+        .btn-edit { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: #475569; height: 38px; font-size: 0.8rem; }
+
+        .fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--emerald); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: none; cursor: pointer; z-index: 100; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .form-box { background: var(--card); padding: 1.5rem; border-radius: 16px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #475569; }
+        
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            tr { display: flex; flex-direction: column; border-bottom: 3px solid #f1f5f9; }
+            td { width: 100% !important; box-sizing: border-box; padding: 10px 14px; }
+            .action-cell-container { justify-content: flex-start; margin-top: 5px; }
+        }
     </style>
 </head>
 <body>
@@ -62,42 +69,62 @@
 <div class="container">
     <header>
         <h1>JOB QUEST</h1>
-        <div id="sync-status" style="display:none; color: var(--emerald); font-weight: bold; font-size: 0.8rem;">SYNCING...</div>
+        <div id="sync-status" style="display:none; color: var(--emerald); font-weight: bold;">SYNCING...</div>
     </header>
 
     <div class="stats-grid">
         <div class="stat-card"><span class="stat-label">Total</span><span id="stat-total" class="stat-value">0</span></div>
         <div class="stat-card"><span class="stat-label">Remote</span><span id="stat-remote" class="stat-value" style="color:var(--blue)">0</span></div>
-        <div class="stat-card"><span class="stat-label">Local (TN)</span><span id="stat-local" class="stat-value" style="color:var(--emerald)">0</span></div>
-        <div class="stat-card"><span class="stat-label">Interview</span><span id="stat-active" class="stat-value">0</span></div>
-        <div class="stat-card"><span class="stat-label">Rejects</span><span id="stat-rejects" class="stat-value" style="color:var(--red)">0</span></div>
+        <div class="stat-card"><span class="stat-label">Local</span><span id="stat-local" class="stat-value" style="color:var(--emerald)">0</span></div>
+        <div class="stat-card"><span class="stat-label">Interviews</span><span id="stat-active" class="stat-value">0</span></div>
+    </div>
+
+    <div class="filter-section">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>Date Filter</label>
+                <input type="date" id="filterDate" onchange="runFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Work Type</label>
+                <select id="filterType" onchange="runFilters()">
+                    <option value="all">All Locations</option>
+                    <option value="Remote">Remote Only</option>
+                    <option value="Local">Local (TN Area)</option>
+                </select>
+            </div>
+        </div>
+        <div class="results-meta">
+            <span>Showing <span class="count-badge" id="visibleCount">0</span> entries</span>
+            <button onclick="clearFilters()" style="background:none; border:none; color:var(--blue); cursor:pointer; font-size:0.75rem; text-decoration:underline;">Reset Filters</button>
+        </div>
     </div>
 
     <div class="table-box">
-        <table>
-            <tbody id="tableBody"></tbody>
-        </table>
+        <table><tbody id="tableBody"></tbody></table>
     </div>
 </div>
 
 <div id="modalOverlay" class="modal-overlay">
     <form id="jobForm" class="form-box">
-        <h2 id="modalTitle" style="margin:0; color:var(--emerald)">Add Application</h2>
+        <h2 id="modalTitle" style="margin:0; color:var(--emerald)">Add Job</h2>
+        <input type="date" id="appliedDate">
         <input type="text" id="company" placeholder="Company Name" required>
         <input type="text" id="title" placeholder="Job Title" required>
-        <input type="text" id="location" placeholder="Location (Remote, TN, etc.)">
-        <input type="text" id="resume" placeholder="Resume Used (e.g. Front-end 2026)">
-        <input type="url" id="jobUrl" placeholder="Link (Column G)">
+        <select id="location">
+            <option value="Local">Local (TN Area)</option>
+            <option value="Remote">Remote</option>
+        </select>
+        <input type="text" id="resume" placeholder="Resume Version Used">
+        <input type="url" id="jobUrl" placeholder="Job Posting Link">
         <select id="status">
             <option value="Applied">Applied</option>
             <option value="Interviewing">Interviewing</option>
-            <option value="Offer">Offer</option>
             <option value="Rejected">Rejected</option>
         </select>
-        <div class="form-actions">
-            <button type="submit" id="addBtn">SAVE ENTRY</button>
-            <button type="button" id="delBtn" onclick="handleDeleteClick()">DELETE ENTRY</button>
-            <button type="button" class="btn-cancel" onclick="closeModal()">Dismiss</button>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+            <button type="submit" id="addBtn" style="background:var(--emerald); padding:15px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:var(--bg)">SAVE ENTRY</button>
+            <button type="button" onclick="closeModal()" style="background:none; border:none; color:var(--slate); text-decoration:underline; cursor:pointer;">Cancel</button>
         </div>
     </form>
 </div>
@@ -105,127 +132,126 @@
 <button class="fab" onclick="openModalForAdd()">+</button>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyApDqMKCN17ubbkpHLqolVMlmN3gmnSFyTGCQP1uJcUK0vG_FGBwDMcS3ceEVpNs4O/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyApDqMKCN17ubbkpHLqolVMlmN3gmnSFyTGCQP1uJcUK0vG_FGBwDMcS3ceEVpNs4O/exec'; 
     let jobData = [];
-    let deleteConfirmMode = false;
 
     function loadJobs() {
         const script = document.createElement('script');
-        script.src = `${API_URL}?callback=renderTable&t=${Date.now()}`;
+        script.src = `${API_URL}?callback=initDashboard&t=${Date.now()}`;
         document.body.appendChild(script);
     }
 
-    window.renderTable = function(data) {
+    window.initDashboard = function(data) {
         jobData = data;
-        
-        // Count Stats
+        updateGlobalStats(data);
+        runFilters();
+    };
+
+    function updateGlobalStats(data) {
         document.getElementById('stat-total').innerText = data.length;
         document.getElementById('stat-active').innerText = data.filter(i => i.status === 'Interviewing').length;
-        document.getElementById('stat-rejects').innerText = data.filter(i => i.status === 'Rejected').length;
-        
-        document.getElementById('stat-remote').innerText = data.filter(i => {
-            return (i.location || "").toLowerCase().includes('remote');
-        }).length;
+        document.getElementById('stat-remote').innerText = data.filter(i => (i.location || "") === 'Remote').length;
+        document.getElementById('stat-local').innerText = data.filter(i => (i.location || "") === 'Local').length;
+    }
 
-        document.getElementById('stat-local').innerText = data.filter(i => {
-            const l = (i.location || "").toLowerCase();
-            const isLocal = l.includes('tn') || l.includes('tennessee') || l.includes('knoxville') || l.includes('local') || l.includes('lcal');
-            return isLocal && !l.includes('remote');
-        }).length;
+    function runFilters() {
+        const dateVal = document.getElementById('filterDate').value;
+        const typeVal = document.getElementById('filterType').value;
 
+        let filtered = jobData.filter(i => {
+            let matchDate = true;
+            let matchType = true;
+
+            if (dateVal) {
+                const rowDate = new Date(i.date).toISOString().split('T')[0];
+                matchDate = rowDate === dateVal;
+            }
+
+            if (typeVal !== 'all') {
+                matchType = (i.location || "") === typeVal;
+            }
+            return matchDate && matchType;
+        });
+
+        document.getElementById('visibleCount').innerText = filtered.length;
+        renderRows(filtered);
+    }
+
+    function renderRows(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
-        data.forEach((item, index) => {
+        data.forEach((item) => {
             const tr = document.createElement('tr');
             const sClass = `status-${(item.status || 'applied').toLowerCase()}`;
+            const d = item.date ? new Date(item.date).toLocaleDateString() : '---';
             tr.innerHTML = `
                 <td>
                     <span class="company-name">${item.company}</span>
                     <span class="job-title">${item.title}</span>
-                    <span class="loc-tag">${item.location || ''}</span>
-                    <span class="res-tag">${item.resume || ''}</span>
+                    <span class="meta-data">📅 ${d} | 📍 ${item.location || 'Local'}</span>
                 </td>
-                <td style="width:110px">
+                <td style="width:140px">
                     <select class="status-select ${sClass}" onchange="quickUpdate('${item.company}', this.value)">
                         <option value="Applied" ${item.status==='Applied'?'selected':''}>Applied</option>
                         <option value="Interviewing" ${item.status==='Interviewing'?'selected':''}>Interviewing</option>
-                        <option value="Offer" ${item.status==='Offer'?'selected':''}>Offer</option>
                         <option value="Rejected" ${item.status==='Rejected'?'selected':''}>Rejected</option>
                     </select>
                 </td>
-                <td class="action-cell" style="text-align:right;">
-                    ${item.url ? `<a href="${item.url}" target="_blank" class="btn-link">🔗</a>` : ''}
-                    <button class="btn-edit" onclick="setEdit(${index})">EDIT</button>
+                <td style="width:110px;">
+                    <div class="action-cell-container">
+                        ${item.url ? `<a href="${item.url}" target="_blank" class="btn-link">🔗</a>` : ''}
+                        <button class="btn-edit" onclick="setEdit('${item.company}')">EDIT</button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(tr);
         });
-    };
+    }
+
+    function clearFilters() {
+        document.getElementById('filterDate').value = '';
+        document.getElementById('filterType').value = 'all';
+        runFilters();
+    }
 
     function openModalForAdd() {
-        resetDeleteButton();
         document.getElementById('jobForm').reset();
-        document.getElementById('modalTitle').innerText = "Add Application";
-        document.getElementById('addBtn').innerText = "SAVE ENTRY";
-        document.getElementById('delBtn').style.display = "none";
+        document.getElementById('appliedDate').valueAsDate = new Date();
+        document.getElementById('modalTitle').innerText = "Add Job";
         document.getElementById('company').readOnly = false;
         document.getElementById('modalOverlay').style.display = 'flex';
     }
 
-    window.setEdit = function(index) {
-        resetDeleteButton();
-        const item = jobData[index];
+    window.setEdit = function(companyName) {
+        const item = jobData.find(i => i.company === companyName);
+        if (item.date) document.getElementById('appliedDate').value = new Date(item.date).toISOString().split('T')[0];
         document.getElementById('company').value = item.company;
+        document.getElementById('company').readOnly = true;
         document.getElementById('title').value = item.title;
-        document.getElementById('location').value = item.location || "";
+        document.getElementById('location').value = item.location || "Local";
         document.getElementById('resume').value = item.resume || "";
         document.getElementById('status').value = item.status;
         document.getElementById('jobUrl').value = item.url || "";
-        document.getElementById('modalTitle').innerText = "Update Entry";
-        document.getElementById('addBtn').innerText = "UPDATE ENTRY";
-        document.getElementById('delBtn').style.display = "block";
-        document.getElementById('company').readOnly = true;
         document.getElementById('modalOverlay').style.display = 'flex';
     };
-
-    async function handleDeleteClick() {
-        const btn = document.getElementById('delBtn');
-        const company = document.getElementById('company').value;
-        if (!deleteConfirmMode) {
-            deleteConfirmMode = true;
-            btn.innerText = "CONFIRM DELETE?";
-            btn.classList.add('confirm-state');
-            setTimeout(resetDeleteButton, 3000);
-        } else {
-            showStatus(true); closeModal();
-            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ company, action: 'delete' }) });
-            location.reload();
-        }
-    }
-
-    function resetDeleteButton() {
-        deleteConfirmMode = false;
-        const btn = document.getElementById('delBtn');
-        if(btn) { btn.innerText = "DELETE ENTRY"; btn.classList.remove('confirm-state'); }
-    }
-
-    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; resetDeleteButton(); }
 
     async function quickUpdate(company, status) {
         showStatus(true);
         const item = jobData.find(i => i.company === company);
-        const payload = { ...item, status };
+        const payload = { ...item, status, appliedDate: item.date };
         await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
         loadJobs();
         showStatus(false);
     }
 
-    function showStatus(visible) { document.getElementById('sync-status').style.display = visible ? 'block' : 'none'; }
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+    function showStatus(v) { document.getElementById('sync-status').style.display = v ? 'block' : 'none'; }
 
     document.getElementById('jobForm').onsubmit = async (e) => {
         e.preventDefault();
         showStatus(true); closeModal();
         const payload = {
+            appliedDate: document.getElementById('appliedDate').value,
             company: document.getElementById('company').value,
             title: document.getElementById('title').value,
             location: document.getElementById('location').value,
