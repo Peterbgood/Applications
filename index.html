@@ -515,10 +515,10 @@
         },
 
         load(raw) {
-            this.data = raw.reverse();
-            this.updateStats();
-            this.render();
-        },
+    this.data = raw; // Keep the order exactly as the script sends it
+    this.updateStats();
+    this.render();
+},
 
         parseDate(val) {
             if (!val) return new Date();
