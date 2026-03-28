@@ -28,10 +28,10 @@
 
         .filter-panel { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: none; flex-direction: column; gap: 12px; }
         .filter-panel.open { display: flex; }
-        .filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
         .filter-group { display: flex; flex-direction: column; gap: 5px; }
         .filter-group label { font-size: 0.72rem; font-weight: 600; color: #888; text-transform: uppercase; }
-        input, select { background: white; border: 1px solid #d0d0d0; color: #1a1a1a; padding: 8px 10px; border-radius: 6px; font-size: 0.875rem; width: 100%; font-family: inherit; }
+        input, select { background: white; border: 1px solid #d0d0d0; color: #1a1a1a; padding: 8px 10px; border-radius: 6px; font-size: 0.875rem; width: 100%; font-family: inherit; height: 38px; }
 
         .job-list { display: flex; flex-direction: column; gap: 8px; }
         .job-card { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; }
@@ -70,7 +70,12 @@
         .btn-yes { background: #b91c1c; color: white; }
         .btn-no { background: #f0f0f0; color: #444; }
 
-        @media (max-width: 600px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .job-card { flex-wrap: wrap; } .job-actions { width: 100%; justify-content: flex-end; padding-top: 10px; } }
+        @media (max-width: 600px) { 
+            .stats-row { grid-template-columns: repeat(2, 1fr); } 
+            .job-card { flex-wrap: wrap; } 
+            .job-actions { width: 100%; justify-content: flex-end; padding-top: 10px; border-top: 1px solid #f0f0f0; } 
+            .filter-fields { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -170,7 +175,6 @@
 </div>
 
 <script>
-    // UPDATE THIS URL FROM GOOGLE SCRIPT DEPLOYMENT
     const API_URL = 'https://script.google.com/macros/s/AKfycbyApDqMKCN17ubbkpHLqolVMlmN3gmnSFyTGCQP1uJcUK0vG_FGBwDMcS3ceEVpNs4O/exec'; 
 
     const Dashboard = {
@@ -233,7 +237,7 @@
                         <div class="job-bottom">
                             <span class="chip chip-date">${dateStr}</span>
                             <span class="chip chip-days ${diff > 7 ? 'stale' : ''}">${diff}d ago</span>
-                            <span class="chip chip-resume">📄 ${item.resume || 'General'}</span>
+                            <span class="chip chip-resume">📄 ${item.resume || 'Marketing'}</span>
                             <span class="chip chip-type">💼 ${item.jobType || 'Full-time'}</span>
                             <span class="chip ${item.location === 'Remote' ? 'chip-remote' : 'chip-local'}">${item.location}</span>
                             <span class="chip chip-${item.status.toLowerCase()}">${item.status}</span>
