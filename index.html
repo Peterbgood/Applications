@@ -47,6 +47,11 @@
         .chip-days.stale { background: #fee2e2; color: #b91c1c; }
         .chip-resume { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
         .chip-type { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .chip-salary { 
+    background: #ecfdf5; 
+    color: #065f46; 
+    border: 1px solid #a7f3d0; 
+}
         .chip-remote { background: #dbeafe; color: #1d4ed8; }
         .chip-local { background: #d1fae5; color: #065f46; }
         .chip-applied { background: #fef9c3; color: #854d0e; }
@@ -157,6 +162,7 @@
                     <div><label style="font-size:0.7rem; font-weight:600;">Resume Used</label><select id="formResume"><option value="Frontend Developer">Frontend Developer</option><option value="Business Analyst">Business Analyst</option><option value="Marketing Specialist">Marketing Specialist</option></select></div>
                     <div><label style="font-size:0.7rem; font-weight:600;">Job Type</label><select id="formType"><option value="Full-time">Full-time</option><option value="Contract">Contract</option></select></div>
                 </div>
+                <div><label style="font-size:0.7rem; font-weight:600;">Salary Range</label><input type="text" id="formSalary" placeholder="e.g. $120k - $150k"></div>
                 <div><label style="font-size:0.7rem; font-weight:600;">Status</label><select id="formStatus"><option value="Applied">Applied</option><option value="Interviewing">Interviewing</option><option value="Rejected">Rejected</option></select></div>
                 <div><label style="font-size:0.7rem; font-weight:600;">URL</label><input type="url" id="formUrl"></div>
             </div>
@@ -237,8 +243,9 @@
                         <div class="job-bottom">
                             <span class="chip chip-date">${dateStr}</span>
                             <span class="chip chip-days ${diff > 7 ? 'stale' : ''}">${diff}d ago</span>
-                            <span class="chip chip-resume">📄 ${item.resume || 'Marketing'}</span>
+                            <span class="chip chip-resume">📄 ${item.resume || 'General'}</span>
                             <span class="chip chip-type">💼 ${item.jobType || 'Full-time'}</span>
+                            ${item.salary ? `<span class="chip chip-salary">💰 ${item.salary}</span>` : ''}
                             <span class="chip ${item.location === 'Remote' ? 'chip-remote' : 'chip-local'}">${item.location}</span>
                             <span class="chip chip-${item.status.toLowerCase()}">${item.status}</span>
                         </div>
@@ -275,6 +282,7 @@
                 document.getElementById('formResume').value = item.resume || 'Marketing Specialist';
                 document.getElementById('formLocation').value = item.location;
                 document.getElementById('formType').value = item.jobType || 'Full-time';
+                document.getElementById('formSalary').value = item.salary || '';
                 document.getElementById('formStatus').value = item.status;
                 document.getElementById('formUrl').value = item.url || '';
             }
@@ -314,6 +322,7 @@
             resume: document.getElementById('formResume').value,
             location: document.getElementById('formLocation').value,
             jobType: document.getElementById('formType').value,
+            salary: document.getElementById('formSalary').value,
             status: document.getElementById('formStatus').value,
             url: document.getElementById('formUrl').value
         });
